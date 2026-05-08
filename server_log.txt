@@ -1,0 +1,2 @@
+🚀 Civil Registry server running on http://localhost:3001
+✅ Connected to the Civil Registry database.
