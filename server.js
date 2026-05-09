@@ -13,6 +13,35 @@ const db = new sqlite3.Database('./citizenDB.db', (err) => {
     else console.log('✅ Connected to the Civil Registry database.');
 });
 
+// ═══ Medical Data APIs (database.json) ═══
+const DB_PATH = path.join(__dirname, 'database.json');
+
+app.get('/api/data', (req, res) => {
+    fs.readFile(DB_PATH, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading database.json:', err);
+            return res.json({ patients: {}, visits: [] });
+        }
+        try {
+            res.json(JSON.parse(data));
+        } catch (e) {
+            console.error('Error parsing database.json:', e);
+            res.json({ patients: {}, visits: [] });
+        }
+    });
+});
+
+app.post('/api/save', (req, res) => {
+    const data = JSON.stringify(req.body, null, 2);
+    fs.writeFile(DB_PATH, data, 'utf8', (err) => {
+        if (err) {
+            console.error('Error writing to database.json:', err);
+            return res.status(500).json({ error: true, message: 'Failed to save data' });
+        }
+        res.json({ success: true });
+    });
+});
+
 // ═══ Arabic Text Normalization ═══
 // Normalizes Arabic text in JS: unify Alif variants → ا, Ta Marbuta → ه
 function normalizeArabic(text) {
@@ -128,5 +157,5 @@ app.post('/api/editCitizen', (req, res) => {
     });
 });
 
-const PORT = 3001;
-app.listen(PORT, () => console.log(`🚀 Civil Registry server running on http://localhost:${PORT}`));
+const PORT = 3000;
+app.listen(PORT, () => console.log(`🚀 IMS Medical System server running on http://localhost:${PORT}`));
