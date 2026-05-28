@@ -19,9 +19,9 @@ if %errorlevel% neq 0 (
 )
 
 REM --- 2. تحقق هل السيرفر يعمل مسبقاً ---
-netstat -ano | findstr ":3000 " | findstr "LISTENING" >nul 2>&1
+netstat -ano | findstr ":3001 " | findstr "LISTENING" >nul 2>&1
 if %errorlevel% equ 0 (
-    echo [معلومة] السيرفر يعمل مسبقاً على المنفذ 3000.
+    echo [معلومة] السيرفر يعمل مسبقاً على المنفذ 3001.
     goto :OpenApp
 )
 
@@ -34,7 +34,7 @@ set /A TRIES=0
 :WaitLoop
     timeout /t 1 /nobreak >nul
     set /A TRIES+=1
-    netstat -ano | findstr ":3000 " | findstr "LISTENING" >nul 2>&1
+    netstat -ano | findstr ":3001 " | findstr "LISTENING" >nul 2>&1
     if %errorlevel% equ 0 goto :OpenApp
     if %TRIES% lss 15 goto :WaitLoop
 
@@ -43,7 +43,7 @@ goto :OpenApp
 
 :OpenApp
 REM --- 5. ابحث عن Chrome وافتح النظام بوضع App Mode ---
-set APP_URL=http://localhost:3000/IMS_Medical_System_4.html
+set APP_URL=http://localhost:3001/IMS_Medical_System_4.html
 set APP_TITLE=IMS Medical System
 
 REM مسارات Chrome المحتملة
@@ -81,7 +81,7 @@ REM --- 6. رسالة بسيطة في شريط العنوان تبقى في ال
 echo.
 echo  ╔══════════════════════════════════════════════╗
 echo  ║   IMS — نظام إدارة المعلومات الطبية         ║
-echo  ║   السيرفر يعمل على: http://localhost:3000    ║
+echo  ║   السيرفر يعمل على: http://localhost:3001    ║
 echo  ║   لإيقاف النظام: اضغط Ctrl+C أو أغلق هذه   ║
 echo  ║   النافذة.                                  ║
 echo  ╚══════════════════════════════════════════════╝
@@ -90,7 +90,7 @@ echo.
 REM احتفظ بالنافذة مفتوحة حتى لا يتوقف السيرفر
 :KeepAlive
     timeout /t 30 /nobreak >nul 2>&1
-    netstat -ano | findstr ":3000 " | findstr "LISTENING" >nul 2>&1
+    netstat -ano | findstr ":3001 " | findstr "LISTENING" >nul 2>&1
     if %errorlevel% neq 0 (
         echo [تحذير] السيرفر توقف. جاري إعادة التشغيل...
         start "" /B /MIN cmd /c "node server.js > server_log.txt 2>&1"

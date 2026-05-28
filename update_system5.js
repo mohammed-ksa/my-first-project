@@ -1,6 +1,6 @@
 const fs = require('fs');
 const backup = JSON.parse(fs.readFileSync('IMS_Backup_2026-04-26.json', 'utf8'));
-let html = fs.readFileSync('IMS_Medical_System_4.html', 'utf8');
+let html = fs.readFileSync('app.js', 'utf8');
 
 Object.values(backup.patients).forEach(p => {
     if (p.gender === "ذكر" || p.gender === "ط°ظƒط±" || p.gender === "MALE" || p.gender === "Male") p.gender = "Male";
@@ -16,13 +16,13 @@ const visitsStr = JSON.stringify(backup.visits);
 
 const pStart = html.indexOf('var INIT_PATIENTS = ');
 const vStart = html.indexOf('var INIT_VISITS = ');
-const afterVisits = html.indexOf('const GOV=');
+const afterVisits = html.indexOf('const GOV');
 
 if (pStart !== -1 && vStart !== -1 && afterVisits !== -1) {
     const before = html.substring(0, pStart);
     const newMiddle = `var INIT_PATIENTS = ${patientsStr};\nvar INIT_VISITS = ${visitsStr};\n\n\n`;
     html = before + newMiddle + html.substring(afterVisits);
-    fs.writeFileSync('IMS_Medical_System_4.html', html, 'utf8');
+    fs.writeFileSync('app.js', html, 'utf8');
     console.log("Data replaced successfully");
 } else {
     console.log("Could not find delimiters", pStart, vStart, afterVisits);
