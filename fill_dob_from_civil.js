@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 
-const DATABASE_PATH = path.join(__dirname, 'database.json');
+const DATABASE_PATH = path.join(__dirname, 'database_nuseirat.json');
 const CIVIL_DB_PATH = path.join(__dirname, 'citizenDB.db');
 
 function calcAge(dob) {
@@ -40,7 +40,7 @@ function civilDateToISO(dateStr) {
     const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if (m) {
         const year = parseInt(m[3]);
-        if (year < 1900 || year > 2025) return ''; // تاريخ غير واقعي
+        if (year < 1900 || year > 2026) return ''; // تاريخ غير واقعي
         return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
     }
     // صيغة YYYY-MM-DD

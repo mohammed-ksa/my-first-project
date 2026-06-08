@@ -13,9 +13,26 @@ const WCS = ["Dressing", "Follow-up Dressing", "Wound Cleaning", "Suture Removal
 const BCS = ["Screening", "Screening and Referral"]; const MALS = ["Screening", "SAM referral", "MAM referral"];
 
 // ═══ IndexedDB Storage ═══
-const DB_NAME = "IMS_DB", DB_VER = 1;
+const DB_VER = 1;
 let db = null;
-function openDB() { return new Promise((ok, err) => { const r = indexedDB.open(DB_NAME, DB_VER); r.onupgradeneeded = e => { const d = e.target.result; if (!d.objectStoreNames.contains("data")) d.createObjectStore("data") }; r.onsuccess = e => { db = e.target.result; ok(db) }; r.onerror = e => err(e) }) }
+let currentPoint = null;
+
+function openDB() {
+  return new Promise((ok, err) => {
+    const dbName = "IMS_DB_" + (currentPoint || "nuseirat");
+    const r = indexedDB.open(dbName, DB_VER);
+    r.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains("data")) d.createObjectStore("data");
+    };
+    r.onsuccess = e => {
+      db = e.target.result;
+      ok(db);
+    };
+    r.onerror = e => err(e);
+  });
+}
+
 function dbGet(k) { return new Promise((ok, err) => { const tx = db.transaction("data", "readonly"); const s = tx.objectStore("data"); const r = s.get(k); r.onsuccess = () => ok(r.result); r.onerror = e => err(e) }) }
 function dbPut(k, v) { return new Promise((ok, err) => { const tx = db.transaction("data", "readwrite"); const s = tx.objectStore("data"); const r = s.put(v, k); r.onsuccess = () => ok(); r.onerror = e => err(e) }) }
 
@@ -23,13 +40,132 @@ let P = {}, V = [];
 let F = { gender: "انثى", disability: "No", disabilityType: "", displacement: "نازح", fmService: "", srhService: "", woundCare: "", breastCancer: "", malnutrition: "" };
 let eId = null, chD = null, chM = null, saveCount = 0;
 
+function checkSession() {
+  try {
+    const sessStr = localStorage.getItem('ims-session');
+    if (sessStr) {
+      const sess = JSON.parse(sessStr);
+      const today = td();
+      if (sess.date === today && sess.pointId) {
+        return sess;
+      }
+    }
+  } catch (e) {
+    console.error("Session check error:", e);
+  }
+  return null;
+}
+
+window.doLogin = async function(pointId, password) {
+  if (!pointId || !password) {
+    fl("⚠️ الرجاء اختيار النقطة الطبية وإدخال كلمة المرور", "err");
+    return;
+  }
+  const btn = $("loginBtn");
+  btn.disabled = true;
+  btn.textContent = "جاري الدخول...";
+  try {
+    const res = await fetch(window.location.origin + '/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pointId, password })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      currentPoint = data.pointId;
+      localStorage.setItem('ims-session', JSON.stringify({
+        pointId: data.pointId,
+        name: data.name,
+        date: td()
+      }));
+      
+      // Hide login, show app
+      hi($("loginScreen"));
+      sh($("appContainer"));
+      
+      // Update header
+      $("currentPointName").textContent = data.name;
+      sh($("pointIndicator"));
+      
+      // Load data and run normal init
+      await loadData();
+      uB();
+      $("idI").focus();
+      checkBackup();
+      fl("👋 مرحباً بك في " + data.name, "ok");
+    } else {
+      const errData = await res.json();
+      fl("❌ " + (errData.message || "فشل تسجيل الدخول"), "err");
+    }
+  } catch (e) {
+    console.error("Login error:", e);
+    fl("❌ حدث خطأ في الاتصال بالخادم", "err");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "تسجيل الدخول";
+  }
+};
+
+window.doLogout = function() {
+  if (!confirm("هل أنت متأكد من تسجيل الخروج؟")) return;
+  localStorage.removeItem('ims-session');
+  currentPoint = null;
+  P = {};
+  V = [];
+  sh($("loginScreen"));
+  hi($("appContainer"));
+  hi($("pointIndicator"));
+  const cards = document.querySelectorAll(".point-card");
+  cards.forEach(c => c.classList.remove("selected"));
+  $("selectedPointId").value = "";
+  $("loginPassword").value = "";
+};
+
+window.selectPoint = function(pointId, cardEl) {
+  const cards = document.querySelectorAll(".point-card");
+  cards.forEach(c => c.classList.remove("selected"));
+  cardEl.classList.add("selected");
+  
+  const selectedInput = $("selectedPointId");
+  if (selectedInput) {
+    selectedInput.value = pointId;
+  }
+  
+  const label = $("passwordLabel");
+  if (label) {
+    let pointNameAr = "";
+    if (pointId === "nuseirat") pointNameAr = "نقطة النصيرات الطبية (أبو مدين)";
+    else if (pointId === "mujayda") pointNameAr = "نقطة المجايدة";
+    else if (pointId === "deirbalah") pointNameAr = "نقطة دير البلح";
+    label.textContent = "كلمة المرور لـ " + pointNameAr + ":";
+  }
+  
+  const formGroup = $("loginFormGroup");
+  if (formGroup) {
+    sh(formGroup);
+  }
+  
+  const pwdInput = $("loginPassword");
+  if (pwdInput) {
+    pwdInput.value = "";
+    pwdInput.focus();
+  }
+};
+
+window.submitLogin = function() {
+  const pointId = $("selectedPointId").value;
+  const password = $("loginPassword").value;
+  window.doLogin(pointId, password);
+};
+
 async function loadData() {
   await openDB();
   let p = await dbGet("patients").catch(() => null);
   let v = await dbGet("visits").catch(() => null);
 
+  const pName = currentPoint || 'nuseirat';
   try {
-    const res = await fetch(window.location.origin + '/api/data');
+    const res = await fetch(window.location.origin + '/api/data?point=' + pName);
     if (res.ok) {
       const srv = await res.json();
       if (srv && srv.patients) {
@@ -39,23 +175,24 @@ async function loadData() {
     }
   } catch (e) { console.warn("Server load fail", e) }
 
-  P = p || INIT_PATIENTS;
-  V = v || INIT_VISITS;
+  P = p || ((pName === 'nuseirat') ? INIT_PATIENTS : {});
+  V = v || ((pName === 'nuseirat') ? INIT_VISITS : []);
   // Also save to IndexedDB if first time
   if (!p) { await dbPut("patients", P); await dbPut("visits", V) }
   uB();
 }
 
 async function persist() {
+  const pName = currentPoint || 'nuseirat';
   try { await dbPut("patients", P); await dbPut("visits", V) } catch (e) { console.warn("IndexedDB save failed:", e) }
   // Backup to localStorage too
-  try { localStorage.setItem("ims-bk-p", JSON.stringify(P)); localStorage.setItem("ims-bk-v", JSON.stringify(V)) } catch (e) { }
+  try { localStorage.setItem("ims-bk-p-" + pName, JSON.stringify(P)); localStorage.setItem("ims-bk-v-" + pName, JSON.stringify(V)) } catch (e) { }
 
   try {
     const res = await fetch(window.location.origin + '/api/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ patients: P, visits: V })
+      body: JSON.stringify({ patients: P, visits: V, pointId: pName })
     });
     if (res.ok) {
       const out = await res.json();
@@ -63,26 +200,28 @@ async function persist() {
         P = out.dbData.patients;
         V = out.dbData.visits;
         await dbPut("patients", P); await dbPut("visits", V);
-        localStorage.removeItem('ims-offline-dirty');
+        localStorage.removeItem('ims-offline-dirty-' + pName);
       }
     } else {
-      localStorage.setItem('ims-offline-dirty', 'true');
+      localStorage.setItem('ims-offline-dirty-' + pName, 'true');
     }
   } catch (e) {
     console.warn("Server sync fail", e);
-    localStorage.setItem('ims-offline-dirty', 'true');
+    localStorage.setItem('ims-offline-dirty-' + pName, 'true');
   }
 }
 
 window.addEventListener('online', () => {
-  if (localStorage.getItem('ims-offline-dirty')) {
+  const pName = currentPoint || 'nuseirat';
+  if (localStorage.getItem('ims-offline-dirty-' + pName)) {
     console.log("🌐 Network restored! Syncing offline changes...");
     persist();
   }
 });
 
 setInterval(() => {
-  if (navigator.onLine && localStorage.getItem('ims-offline-dirty')) persist();
+  const pName = currentPoint || 'nuseirat';
+  if (currentPoint && navigator.onLine && localStorage.getItem('ims-offline-dirty-' + pName)) persist();
 }, 30000);
 
 function td() { return new Date().toISOString().split("T")[0] }
@@ -131,9 +270,30 @@ function rP() { bPgen(); bP("dP", ["No", "Yes"], "disability", ["لا", "نعم"
 function init() {
   fSel("fG", GOV, "— اختر —"); fSel("fSo", SOC, "— اختر —"); fSel("fDT", DTA, "— نوع الإعاقة —"); $("fVD").value = td(); rP(); hi($("fDT"));
   fSel("eGo", GOV, "— اختر —"); fSel("eSo", SOC, "— اختر —"); fSel("eDT", DTA, "— النوع —"); fSel("eFM", FMS, "— بدون —"); fSel("eSR", SRHS, "— بدون —"); fSel("eWC", WCS, "— بدون —"); fSel("eBC", BCS, "— بدون —"); fSel("eML", MALS, "— بدون —");
-  loadData().then(() => { uB(); $("idI").focus() });
-  // Check backup reminder
-  checkBackup()
+
+  const pwdInput = $("loginPassword");
+  if (pwdInput) {
+    pwdInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        window.submitLogin();
+      }
+    });
+  }
+
+  const session = checkSession();
+  if (session) {
+    currentPoint = session.pointId;
+    $("currentPointName").textContent = session.name;
+    hi($("loginScreen"));
+    sh($("appContainer"));
+    sh($("pointIndicator"));
+    loadData().then(() => { uB(); $("idI").focus() });
+    checkBackup();
+  } else {
+    sh($("loginScreen"));
+    hi($("appContainer"));
+    hi($("pointIndicator"));
+  }
 }
 
 function calcAgeFromDOB() {
@@ -359,17 +519,97 @@ function bCharts(dfFrom, dfTo) {
 }
 
 // ═══ LIST ═══
-function rList() {
-  const q = ($("sI").value || "").trim(); const dF = $("sDate") ? $("sDate").value : ""; const sF = $("sSrv") ? $("sSrv").value : ""; const f = V.filter(v => { if (q && !v.fullName.includes(q) && !v.idNumber.includes(q) && !(v.phone && v.phone.includes(q))) return false; if (dF && v.visitDate !== dF) return false; if (sF) { if (sF === "FM" && !v.fmService) return false; if (sF === "SRH" && !v.srhService) return false; if (sF === "Wound" && !v.woundCare) return false; if (sF === "Breast" && !v.breastCancer) return false; if (sF === "Mal" && !v.malnutrition) return false; } return true; }); const l = [...f].sort((a, b) => { const d1 = new Date(a.visitDate || "1970-01-01").getTime(); const d2 = new Date(b.visitDate || "1970-01-01").getTime(); return d2 === d1 ? b.id - a.id : d2 - d1; });
-  if (!l.length) { $("lC").innerHTML = '<div style="text-align:center;padding:40px;color:var(--s)"><div style="font-size:40px;opacity:.3;margin-bottom:10px">📂</div>' + (q ? "لا توجد نتائج" : "لا توجد سجلات") + '</div>'; return }
-  const totalFiltered = l.length;
-  const displayList = l.slice(0, 150);
-  const numStart = totalFiltered;
-  // Compute daily number for each visit
-  const dailyMap = {}; V.forEach(v => { const d = v.visitDate || ""; if (!dailyMap[d]) dailyMap[d] = []; dailyMap[d].push(v.id) });
-  function getDayNum(v) { const arr = dailyMap[v.visitDate || ""] || []; return arr.indexOf(v.id) + 1 }
-  const countLabel = totalFiltered > 150 ? 'أحدث 150 من أصل ' + totalFiltered + ' سجل' : 'إجمالي السجلات المعروضة: ' + totalFiltered;
-  $("lC").innerHTML = '<div style="text-align:center;padding:4px;color:var(--s);font-size:11px">' + countLabel + '</div>' + displayList.map(v => { const dn = getDayNum(v); return '<div class="rc" style="display:flex;gap:12px;align-items:flex-start"><div style="min-width:50px;text-align:center;padding-top:4px"><div style="font-size:28px;font-weight:900;color:var(--p);line-height:1">' + dn + '</div><div style="font-size:9px;color:var(--s);margin-top:2px">' + ((v.visitDate || "").substring(5) || "") + '</div></div><div style="flex:1"><div class="rt"><div><div class="rn"><span style="background:var(--p);color:#fff;padding:1px 8px;border-radius:6px;font-size:11px;margin-left:6px">#' + (numStart - l.indexOf(v)) + '</span> ' + v.fullName + '</div><div class="ri">' + v.idNumber + ' | ' + v.gender + ' | ' + (v.age != null ? v.age + ' (' + v.ageGroup + ')' : '') + '</div></div><span class="rd">' + (v.visitDate || '—') + '</span></div><div class="rts">' + (v.fmService ? '<span class="tg tb">' + v.fmService + '</span>' : '') + (v.srhService ? '<span class="tg tgg">' + v.srhService + '</span>' : '') + (v.woundCare ? '<span class="tg to">' + v.woundCare + '</span>' : '') + (v.breastCancer ? '<span class="tg tr">' + v.breastCancer + '</span>' : '') + (v.malnutrition ? '<span class="tg to">' + v.malnutrition + '</span>' : '') + (v.referral ? '<span class="tg tb">' + v.referral + '</span>' : '') + '</div><div class="rm"><span>📍 ' + (v.governorate || '') + '</span><span>🏠 ' + (v.displacement || '') + '</span>' + (v.phone ? '<span>📞 ' + v.phone + '</span>' : '') + '</div><div class="rc-act"><button class="rbtn rbtn-e" onclick="opE(' + v.id + ')">✏️ تعديل</button><button class="rbtn" style="background:var(--gl);color:var(--g)" onclick="addVisitFrom(\'' + v.idNumber + '\')">➕ زيارة</button><button class="rbtn rbtn-d" onclick="dlV(' + v.id + ')">🗑️</button></div></div></div>' }).join("")
+// Helper debounce function
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
+
+window.debouncedSearch = debounce(function(val) {
+  rList(val);
+}, 300);
+
+// ═══ LIST ═══
+async function rList(qVal) {
+  const q = qVal !== undefined ? qVal.trim() : ($("sI").value || "").trim();
+  const dF = $("sDate") ? $("sDate").value : "";
+  const sF = $("sSrv") ? $("sSrv").value : "";
+  
+  try {
+    const res = await fetch(window.location.origin + '/api/searchLocal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: q, pointId: currentPoint, date: dF, service: sF })
+    });
+    const out = await res.json();
+    if (out.success && out.results) {
+      const l = out.results;
+      if (!l.length) {
+        $("lC").innerHTML = '<div style="text-align:center;padding:40px;color:var(--s)"><div style="font-size:40px;opacity:.3;margin-bottom:10px">📂</div>' + (q ? "لا توجد نتائج" : "لا توجد سجلات") + '</div>';
+        return;
+      }
+      const totalFiltered = l.length;
+      const displayList = l.slice(0, 150);
+      const numStart = totalFiltered;
+      
+      const dailyMap = {};
+      V.forEach(v => {
+        const d = v.visitDate || "";
+        if (!dailyMap[d]) dailyMap[d] = [];
+        dailyMap[d].push(v.id);
+      });
+      function getDayNum(v) {
+        const arr = dailyMap[v.visitDate || ""] || [];
+        return arr.indexOf(v.id) + 1;
+      }
+      
+      const countLabel = totalFiltered > 150 ? 'أحدث 150 من أصل ' + totalFiltered + ' سجل' : 'إجمالي السجلات المعروضة: ' + totalFiltered;
+      $("lC").innerHTML = '<div style="text-align:center;padding:4px;color:var(--s);font-size:11px">' + countLabel + '</div>' + displayList.map(v => {
+        const dn = getDayNum(v);
+        return '<div class="rc" style="display:flex;gap:12px;align-items:flex-start">' +
+               '<div style="min-width:50px;text-align:center;padding-top:4px">' +
+                 '<div style="font-size:28px;font-weight:900;color:var(--p);line-height:1">' + dn + '</div>' +
+                 '<div style="font-size:9px;color:var(--s);margin-top:2px">' + ((v.visitDate || "").substring(5) || "") + '</div>' +
+               '</div>' +
+               '<div style="flex:1">' +
+                 '<div class="rt">' +
+                   '<div>' +
+                     '<div class="rn">' +
+                       '<span style="background:var(--p);color:#fff;padding:1px 8px;border-radius:6px;font-size:11px;margin-left:6px">#' + (numStart - l.indexOf(v)) + '</span> ' + v.fullName +
+                     '</div>' +
+                     '<div class="ri">' + v.idNumber + ' | ' + v.gender + ' | ' + (v.age != null ? v.age + ' (' + v.ageGroup + ')' : '') + '</div>' +
+                   '</div>' +
+                   '<span class="rd">' + (v.visitDate || '—') + '</span>' +
+                 '</div>' +
+                 '<div class="rts">' +
+                   (v.fmService ? '<span class="tg tb">' + v.fmService + '</span>' : '') +
+                   (v.srhService ? '<span class="tg tgg">' + v.srhService + '</span>' : '') +
+                   (v.woundCare ? '<span class="tg to">' + v.woundCare + '</span>' : '') +
+                   (v.breastCancer ? '<span class="tg tr">' + v.breastCancer + '</span>' : '') +
+                   (v.malnutrition ? '<span class="tg to">' + v.malnutrition + '</span>' : '') +
+                   (v.referral ? '<span class="tg tb">' + v.referral + '</span>' : '') +
+                 '</div>' +
+                 '<div class="rm">' +
+                   '<span>📍 ' + (v.governorate || '') + '</span>' +
+                   '<span>🏠 ' + (v.displacement || '') + '</span>' +
+                   (v.phone ? '<span>📞 ' + v.phone + '</span>' : '') +
+                 '</div>' +
+                 '<div class="rc-act">' +
+                   '<button class="rbtn rbtn-e" onclick="opE(' + v.id + ')">✏️ تعديل</button>' +
+                   '<button class="rbtn" style="background:var(--gl);color:var(--g)" onclick="addVisitFrom(\'' + v.idNumber + '\')">➕ زيارة</button>' +
+                   '<button class="rbtn rbtn-d" onclick="dlV(' + v.id + ')">🗑️</button>' +
+                 '</div>' +
+               '</div>' +
+             '</div>';
+      }).join("");
+    }
+  } catch(e) {
+    console.error("Local search error:", e);
+  }
 }
 
 async function dlV(id) { 
@@ -377,7 +617,7 @@ async function dlV(id) {
   try {
     const res = await fetch(window.location.origin + '/api/deleteData', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ visitId: id })
+      body: JSON.stringify({ visitId: id, pointId: currentPoint })
     });
     const out = await res.json();
     if (out.success) {
@@ -435,7 +675,7 @@ function svE() {
     let second = names[1] || '';
     let third = names[2] || '';
     let family = names.length > 3 ? names.slice(3).join(' ') : (names[3] || '');
-    fetch("http://localhost:3000/api/editCitizen", {
+    fetch(window.location.origin + "/api/editCitizen", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: id, first: first, second: second, third: third, family: family, dob: dob, gender: V[i].gender, governorate: V[i].governorate })
@@ -861,7 +1101,7 @@ window.dlP = async function (id) {
   try {
     const res = await fetch(window.location.origin + '/api/deleteData', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ patientId: id })
+      body: JSON.stringify({ patientId: id, pointId: currentPoint })
     });
     const out = await res.json();
     if (out.success) {

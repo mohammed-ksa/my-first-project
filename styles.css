@@ -2,7 +2,7 @@
     * {
       margin: 0;
       padding: 0;
-      box-sizing: border-box
+      box-sizing: border-box;
     }
 
     :root {
@@ -777,7 +777,7 @@
       font-family: 'Tajawal';
       font-size: 14px;
       font-weight: 600;
-      z-index: 999;
+      z-index: 2000;
       box-shadow: 0 4px 20px rgba(0, 0, 0, .2);
       animation: pop .25s ease;
       white-space: nowrap
@@ -878,7 +878,197 @@
 
       .ib input {
         font-size: 16px;
-        padding: 10px
+        padding: 10px;
       }
     }
-  
+
+/* Point badge styling in header */
+.point-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--pl);
+  color: var(--p);
+  border: 1.5px solid var(--b);
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.logout-btn {
+  background: var(--rl);
+  color: var(--r);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 6px;
+}
+
+.logout-btn:hover {
+  background: var(--r);
+  color: #fff;
+  transform: scale(1.03);
+}
+
+/* Fullscreen Login Overlay */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top right, #f8fafc, #e2e8f0);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Tajawal', sans-serif;
+}
+
+.login-box {
+  background: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 580px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
+.login-header h2 {
+  color: var(--p);
+  margin-top: 10px;
+  margin-bottom: 6px;
+  font-weight: 800;
+  font-size: 22px;
+}
+
+.login-header p {
+  color: var(--s);
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+.point-selection {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.point-card {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.point-card:hover {
+  border-color: var(--p);
+  background: var(--pl);
+  transform: translateY(-2px);
+}
+
+.point-card.selected {
+  border-color: var(--p);
+  background: var(--pl);
+  box-shadow: 0 4px 12px rgba(0, 89, 179, 0.12);
+}
+
+.point-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.point-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.login-form-group {
+  border-top: 1.5px dashed #e2e8f0;
+  padding-top: 20px;
+  text-align: right;
+  animation: fadeIn 0.3s ease;
+}
+
+.login-form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--s);
+  margin-bottom: 8px;
+}
+
+.password-input-wrapper {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 18px;
+  text-align: center;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  background: #f8fafc;
+}
+
+.password-input-wrapper input:focus {
+  outline: none;
+  border-color: var(--p);
+  background: #fff;
+}
+
+.login-submit-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--p);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.login-submit-btn:hover {
+  background: var(--pd);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 580px) {
+  .point-selection {
+    grid-template-columns: 1fr;
+  }
+  .point-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    text-align: right;
+  }
+  .point-icon {
+    font-size: 24px;
+    margin-bottom: 0;
+  }
+}
