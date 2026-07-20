@@ -29,12 +29,11 @@ const db = new sqlite3.Database('./citizenDB.db', (err) => {
             db.run(sql, (idxErr) => {
                 if (idxErr) {
                     console.error('❌ Error creating index:', idxErr.message);
-                } else {
-                    indexCount++;
-                    if (indexCount === createIndexes.length) {
-                        console.log('✅ All Civil Registry search indexes are verified and ready.');
-                        syncJsonToSqlite();
-                    }
+                }
+                indexCount++;
+                if (indexCount === createIndexes.length) {
+                    console.log('✅ Checked all Civil Registry search indexes.');
+                    syncJsonToSqlite();
                 }
             });
         });

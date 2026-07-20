@@ -1,2 +1,116 @@
 🚀 Civil Registry server running on http://localhost:3001
 ✅ Connected to the Civil Registry database.
+🔄 Checking Civil Registry search indexes... (This may take a moment on the very first run)
+❌ Error creating index: SQLITE_ERROR: no such table: main.persons
+❌ Error creating index: SQLITE_ERROR: no such table: main.persons
+❌ Error creating index: SQLITE_ERROR: no such table: main.persons
+❌ Error creating index: SQLITE_ERROR: no such table: main.persons
+✅ Checked all Civil Registry search indexes.
+[sync] Loaded 34742 visits from nuseirat into SQLite local_visits.
+[delete - nuseirat] Removed visit 1781104249143 from both regular and medical facility registers
+[save - nuseirat] Merged: 11074 patients, 34741 visits
+[save-sync] Synced 34741 visits to local_visits for nuseirat
+[save - nuseirat] Merged: 11074 patients, 34742 visits
+[save-sync] Synced 34742 visits to local_visits for nuseirat
+[delete - nuseirat] Removed visit 1781104408434 from both regular and medical facility registers
+[save - nuseirat] Merged: 11074 patients, 34741 visits
+[save-sync] Synced 34741 visits to local_visits for nuseirat
+[login] Failed login attempt for point: mujayda
+[login] Failed login attempt for point: mujayda
+[login] Successful login for point: mujayda
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 432328342 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 432328342 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 432328342 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 900573841 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 900573841 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 900573841 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Successful login for point: nuseirat
+[login] Successful login for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Successful login for point: nuseirat
+[login] Successful login for point: nuseirat
+[login] Successful login for point: nuseirat
+[login] Successful login for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: nuseirat
+[login] Failed login attempt for point: mujayda
+[login] Failed login attempt for point: mujayda
+[login] Failed login attempt for point: mujayda
+[login] Failed login attempt for point: mujayda
+[login] Successful login for point: mujayda
+[login] Successful login for point: mujayda
+[login] Successful login for point: nuseirat
+[login] Successful login for point: nuseirat
+[login] Successful login for point: deirbalah
+[login] Successful login for point: deirbalah
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 900573841 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 802629006 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 802629006 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 802629006 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 802629006 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons
+[searchAdvanced] SQL: SELECT CI_ID_NUM, CI_FIRST_ARB, CI_FATHER_ARB, CI_GRAND_FATHER_ARB, CI_FAMILY_ARB,
+                          CI_BIRTH_DT, CI_SEX_CD, CITTTTY, CI_PERSONAL_CD
+                   FROM persons WHERE CI_ID_NUM = ? LIMIT 50 | Params: [ 802629006 ]
+[searchAdvanced] Error: SQLITE_ERROR: no such table: persons

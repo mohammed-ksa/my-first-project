@@ -10,6 +10,9 @@ REM ================================================================
 
 cd /d "%~dp0"
 
+REM --- استخدم نسخة Node.js المحمولة إذا كانت موجودة ---
+set PATH=%~dp0node-v20.11.0-win-x64;%PATH%
+
 REM --- 1. تحقق من تثبيت Node.js ---
 where node >nul 2>&1
 if %errorlevel% neq 0 (
